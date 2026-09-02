@@ -1,0 +1,24 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Big Data & CSVs (Keep directory structure, ignore big data files)
+datasets/*.csv
+datasets/*.parquet
+*.pcap
+
+# Python Cache & Checkpoints
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+
+# MLflow & Logs
+mlruns/
+logs/
+.trash/
+
+# OS Specific
+.DS_Store
+Thumbs.db

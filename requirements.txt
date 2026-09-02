@@ -1,0 +1,33 @@
+# Core Data & Math
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# Visualization & Notebook
+matplotlib>=3.7.0
+seaborn>=0.12.0
+jupyter>=1.0.0
+ipykernel>=6.20.0
+
+# Machine Learning & Deep Learning
+scikit-learn>=1.2.0
+torch>=2.0.0
+xgboost>=1.7.0
+lightgbm>=4.0.0
+
+# Distributed Computing & MLOps
+ray[data,train,tune,serve]>=2.7.0
+mlflow>=2.5.0
+great-expectations>=0.17.0
+
+# Production API & Utilities
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0
+requests>=2.31.0
+
+# Code Quality & Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+ruff>=0.0.280
+pre-commit>=3.3.0
