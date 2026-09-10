@@ -73,13 +73,20 @@ class RegistryClient:
 
     def load_model_by_alias(self, name: str, alias: str) -> Any:
         """Loads the Python model pipeline artifact by alias (e.g. models:/NetSentry@champion)."""
-        model_uri = f"models:/{name}@{alias}"
-        return mlflow.sklearn.load_model(model_uri)
+        if self.tracking_uri:
+            mlflow.set_tracking_uri(self.tracking_uri)
+        mv = self.get_model_version_by_alias(name, alias)
+        if mv is None:
+            raise ValueError(f"No model found with alias '@{alias}' for '{name}'.")
+        # Load directly via source URI or models URI
+        return mlflow.sklearn.load_model(mv.source)
 
     def load_model_by_version(self, name: str, version: str) -> Any:
         """Loads the Python model pipeline artifact by explicit version number."""
-        model_uri = f"models:/{name}/{version}"
-        return mlflow.sklearn.load_model(model_uri)
+        if self.tracking_uri:
+            mlflow.set_tracking_uri(self.tracking_uri)
+        mv = self.get_model_version(name, str(version))
+        return mlflow.sklearn.load_model(mv.source)
 
     def get_model_threshold(self, model_name: str, version: str) -> float:
         """

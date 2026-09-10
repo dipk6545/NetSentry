@@ -1,0 +1,6 @@
+﻿serving:
+  model_name: NetSentry
+  champion_alias: champion
+  tracking_uri: sqlite:///mlruns.db
+  api_title: NetSentry API
+  api_version: 2.0.0
