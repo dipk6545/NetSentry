@@ -51,11 +51,12 @@ def ingest_raw_flows(
 
     lazy_frames = []
     for file_path in files:
-        # Scan raw CSV lazily with relaxed string fallback for mixed types
+        # Scan raw CSV lazily with relaxed string fallback for mixed types and utf8-lossy encoding
         lf = pl.scan_csv(
             file_path,
             infer_schema_length=10000,
             ignore_errors=True,
+            encoding="utf8-lossy",
             null_values=["", "NA", "null", "NaN", "Infinity", "-Infinity", "inf", "-inf"]
         )
         # Normalize column names

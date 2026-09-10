@@ -1,0 +1,15 @@
+name: catboost
+
+implementation:
+  class_path: catboost.CatBoostClassifier
+
+preprocessing:
+  scaling: none
+
+parameters:
+  iterations: 100
+  learning_rate: 0.1
+  depth: 6
+  random_seed: 42
+  verbose: false
+  thread_count: -1

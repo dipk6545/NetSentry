@@ -1,0 +1,14 @@
+﻿name: lightgbm
+
+implementation:
+  class_path: lightgbm.LGBMClassifier
+
+preprocessing:
+  scaling: none
+
+parameters:
+  n_estimators: 100
+  max_depth: 6
+  learning_rate: 0.1
+  random_state: 42
+  verbosity: -1
