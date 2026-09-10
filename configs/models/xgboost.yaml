@@ -1,0 +1,13 @@
+﻿name: xgboost
+
+implementation:
+  class_path: xgboost.XGBClassifier
+
+preprocessing:
+  scaling: none
+
+parameters:
+  n_estimators: 100
+  max_depth: 6
+  learning_rate: 0.1
+  random_state: 42
