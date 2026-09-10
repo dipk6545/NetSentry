@@ -1,0 +1,16 @@
+﻿evaluation:
+  primary_metric: f1
+
+threshold:
+  enabled: true
+  objective: f1
+
+quality_gates:
+  recall:
+    min: 0.90
+  f1:
+    min: 0.85
+  roc_auc:
+    min: 0.90
+  latency_ms:
+    max: 20.0
