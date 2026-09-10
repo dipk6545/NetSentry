@@ -1,4 +1,4 @@
-﻿"""
+"""
 MLflow Model Registry Client Abstraction (`netsentry.registry.client`).
 ----------------------------------------------------------------------
 Wraps the MLflow Tracking and Model Registry APIs to provide typed operations
@@ -80,3 +80,31 @@ class RegistryClient:
         """Loads the Python model pipeline artifact by explicit version number."""
         model_uri = f"models:/{name}/{version}"
         return mlflow.sklearn.load_model(model_uri)
+
+    def get_model_threshold(self, model_name: str, version: str) -> float:
+        """
+        Retrieves the decision_threshold tag stored on the specified model version.
+        Raises ValueError if missing or invalid.
+        """
+        mv = self.get_model_version(name=model_name, version=str(version))
+        tags = mv.tags or {}
+        if "decision_threshold" not in tags:
+            raise ValueError(
+                f"Model '{model_name}' version '{version}' does not have a 'decision_threshold' tag."
+            )
+        try:
+            return float(tags["decision_threshold"])
+        except (ValueError, TypeError) as e:
+            raise ValueError(
+                f"Invalid 'decision_threshold' '{tags['decision_threshold']}' on model '{model_name}' version '{version}': {e}"
+            ) from e
+
+    def get_alias_threshold(self, model_name: str, alias: str) -> float:
+        """
+        Resolves the model version mapped to the specified alias and retrieves its decision threshold.
+        Raises ValueError if alias not found or threshold missing.
+        """
+        mv = self.get_model_version_by_alias(name=model_name, alias=alias)
+        if mv is None:
+            raise ValueError(f"No model version found for alias '{alias}' on model '{model_name}'.")
+        return self.get_model_threshold(model_name=model_name, version=str(mv.version))

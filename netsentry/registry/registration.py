@@ -1,4 +1,4 @@
-﻿"""
+"""
 Model Registrar (`netsentry.registry.registration`).
 ----------------------------------------------------
 Registers evaluated model artifacts from MLflow runs with rich audit metadata
@@ -49,6 +49,7 @@ class ModelRegistrar:
         artifact_path: str = "model",
         metadata: Optional[Dict[str, Any]] = None,
         description: Optional[str] = None,
+        optimal_threshold: Optional[float] = None,
     ) -> RegistrationResult:
         """
         Creates a registered model version linked to the MLflow run artifact.
@@ -62,6 +63,9 @@ class ModelRegistrar:
             "git.commit_sha": git_sha,
             "registered_at_utc": now_str,
         }
+
+        if optimal_threshold is not None:
+            tags["decision_threshold"] = str(optimal_threshold)
 
         if metadata:
             for k, v in metadata.items():

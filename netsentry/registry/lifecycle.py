@@ -1,4 +1,4 @@
-﻿"""
+"""
 Model Lifecycle Manager (`netsentry.registry.lifecycle`).
 --------------------------------------------------------
 Orchestrates the entire production promotion workflow:
@@ -64,6 +64,7 @@ class ModelLifecycleManager:
         y_test: Union[np.ndarray, pl.Series],
         labels_test: Union[np.ndarray, pl.Series, list],
         metadata: Optional[Dict[str, Any]] = None,
+        optimal_threshold: Optional[float] = None,
     ) -> LifecyclePromotionResult:
         """
         Executes registration, comparison vs incumbent champion, and conditional promotion.
@@ -73,6 +74,7 @@ class ModelLifecycleManager:
             model_name=self.config.model_name,
             run_id=run_id,
             metadata=metadata,
+            optimal_threshold=optimal_threshold,
         )
         challenger_ver = reg.version
 

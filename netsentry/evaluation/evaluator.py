@@ -1,4 +1,4 @@
-﻿"""
+"""
 Final Model Evaluator (`netsentry.evaluation.evaluator`).
 --------------------------------------------------------
 Orchestrates:
@@ -38,6 +38,11 @@ class EvaluationResult:
     slice_metrics: Dict[str, AttackSliceMetric]
     latency: LatencyProfile
     quality_gate: QualityGateDecision
+    optimal_threshold: Optional[float] = None
+
+    def __post_init__(self):
+        if self.optimal_threshold is None:
+            object.__setattr__(self, "optimal_threshold", self.selected_threshold)
 
 
 class Evaluator:
