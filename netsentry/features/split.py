@@ -36,6 +36,8 @@ def extract_feature_matrix(
     """Separates feature matrix X from target vector y and metadata label strings."""
     feature_cols = [c for c in df.columns if c not in (target_col, label_col)]
     X = df.select(feature_cols).to_numpy().astype(np.float32)
+    # Clip extreme finite values and eliminate potential infs/nans
+    X = np.nan_to_num(X, copy=False, nan=0.0, posinf=1e9, neginf=-1e9)
     y = df[target_col].to_numpy().astype(np.int32)
     labels = df[label_col].to_list()
     return X, y, feature_cols, labels

@@ -83,6 +83,10 @@ def sanitize_numeric_values(df: pl.LazyFrame) -> pl.LazyFrame:
     if replace_exprs:
         df = df.with_columns(replace_exprs)
 
+    # Filter out anomalous non-physical negative durations (< 0)
+    if "Flow_Duration" in df.collect_schema().names():
+        df = df.filter(pl.col("Flow_Duration") >= 0)
+
     # Drop records containing any nulls across numerical columns
     return df.drop_nulls()
 

@@ -88,12 +88,12 @@ def compute_temporal_rate_features(df: pl.LazyFrame) -> pl.LazyFrame:
     if "Flow_Duration" in schema:
         # Stable log1p transform on non-negative duration
         exprs.append(
-            (pl.col("Flow_Duration") + 1.0).log().cast(pl.Float32).alias("Log_Flow_Duration")
+            (pl.col("Flow_Duration").clip(lower_bound=0.0) + 1.0).log().cast(pl.Float32).alias("Log_Flow_Duration")
         )
 
     if "Total_Fwd_Packets" in schema and "Total_Backward_Packets" in schema and "Flow_Duration" in schema:
         exprs.append(
-            ((pl.col("Total_Fwd_Packets") + pl.col("Total_Backward_Packets")) / (pl.col("Flow_Duration") + 1.0))
+            ((pl.col("Total_Fwd_Packets") + pl.col("Total_Backward_Packets")) / (pl.col("Flow_Duration").clip(lower_bound=0.0) + 1.0))
             .cast(pl.Float32)
             .alias("Flow_Packet_Density")
         )
