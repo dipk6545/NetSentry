@@ -1,0 +1,9 @@
+﻿experiment_name: netsentry-model-training
+random_seed: 42
+
+tracking:
+  enabled: true
+  tracking_uri: sqlite:///mlruns.db
+
+evaluation:
+  primary_metric: roc_auc
