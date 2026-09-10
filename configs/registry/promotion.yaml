@@ -1,0 +1,38 @@
+﻿registry:
+  model_name: NetSentry
+
+aliases:
+  champion: champion
+  challenger: challenger
+
+comparison:
+  primary_metric: recall
+  secondary_metrics:
+    - precision
+    - f1
+    - roc_auc
+    - pr_auc
+    - fnr
+    - fpr
+    - latency_p95_ms
+
+promotion:
+  require_quality_gates: true
+  require_challenger_better: true
+
+  rules:
+    recall:
+      minimum: 0.90
+      improvement_required: true
+
+    precision:
+      minimum: 0.85
+
+    f1:
+      minimum: 0.85
+
+    roc_auc:
+      minimum: 0.90
+
+    latency_p95_ms:
+      maximum: 20.0
