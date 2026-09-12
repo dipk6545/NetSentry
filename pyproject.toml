@@ -40,3 +40,19 @@ dev = [
 where = ["."]
 include = ["netsentry*"]
 
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+# E: pycodestyle errors, F: Pyflakes (undefined variables, syntax, etc.)
+select = ["E", "F"]
+# Ignore minor style warnings like line-length (E501), ambiguous vars, etc.
+ignore = [
+    "E501",  # Line too long
+    "E402",  # Module level import not at top of file
+    "F401",  # Unused import (allow while developing)
+    "F841",  # Local variable name assigned but never used
+    "E741",  # Ambiguous variable name
+]
+

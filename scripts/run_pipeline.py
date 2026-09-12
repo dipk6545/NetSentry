@@ -22,7 +22,6 @@ import sys
 
 import numpy as np
 import warnings
-import logging
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -300,7 +299,7 @@ def main():
         logger.info("=" * 60)
         logger.info("EVALUATION & QUALITY GATE REPORT")
         logger.info("=" * 60)
-        logger.info(f"Default Decision Threshold:        0.5000")
+        logger.info("Default Decision Threshold:        0.5000")
         logger.info(f"Optimal Decision Threshold (tau*): {eval_result.optimal_threshold:.4f}")
         logger.info("-" * 60)
 
