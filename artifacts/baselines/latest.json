@@ -1,72 +1,46 @@
 {
-  "winner": "xgboost",
+  "winner": "lightgbm",
   "metric": "recall",
   "direction": "maximize",
-  "git_commit_sha": "e8f08736161d99b711eb519ac7959ad4f66d1005",
+  "git_commit_sha": "710e3764ebc5d55aeca016a986484badb2de60fe",
   "models": [
-    {
-      "name": "catboost",
-      "status": "SUCCESS",
-      "metrics": {
-        "accuracy": 0.994711792702274,
-        "precision": 0.9967845659163987,
-        "recall": 0.9717868338557993,
-        "f1": 0.9841269841269841,
-        "roc_auc": 0.9994416393468775
-      },
-      "run_id": "6b5d50673072464286249a16e1aeef24",
-      "config_path": "configs\\models\\catBoost.yaml"
-    },
     {
       "name": "lightgbm",
       "status": "SUCCESS",
       "metrics": {
-        "accuracy": 0.9936541512427287,
-        "precision": 0.9904153354632588,
-        "recall": 0.9717868338557993,
-        "f1": 0.9810126582278481,
-        "roc_auc": 0.999718825528249
+        "accuracy": 0.9988813578147603,
+        "precision": 0.9961365200525558,
+        "recall": 0.9972440143436526,
+        "f1": 0.99668995954395,
+        "roc_auc": 0.9999532995540106
       },
-      "run_id": "ae0f8f94e92742b2af6c44aa91088871",
+      "run_id": "ad15514fef6b48fd831bf79176087323",
       "config_path": "configs\\models\\lightgbm.yaml"
     },
     {
-      "name": "logistic_regression",
+      "name": "random_forest",
       "status": "SUCCESS",
       "metrics": {
-        "accuracy": 0.9550502379693284,
-        "precision": 0.8926174496644296,
-        "recall": 0.8338557993730408,
-        "f1": 0.8622366288492707,
-        "roc_auc": 0.9828543396587619
+        "accuracy": 0.9972946313108741,
+        "precision": 0.9971832768933759,
+        "recall": 0.9867681370476503,
+        "f1": 0.9919483688166542,
+        "roc_auc": 0.9999059264366859
       },
-      "run_id": "fb2b504537ff4df2a7788e9236d5362e",
-      "config_path": "configs\\models\\logistic_regression.yaml"
-    },
-    {
-      "name": "svm",
-      "status": "SUCCESS",
-      "metrics": {
-        "accuracy": 0.9698572184029614,
-        "precision": 0.9395973154362416,
-        "recall": 0.877742946708464,
-        "f1": 0.9076175040518638,
-        "roc_auc": 0.9800146769085963
-      },
-      "run_id": "85f787526ff8466ab92d18bf4236acf5",
-      "config_path": "configs\\models\\svm.yaml"
+      "run_id": "9133dec9ddd245be90f39f9389e8a3b3",
+      "config_path": "configs\\models\\random_forest.yaml"
     },
     {
       "name": "xgboost",
       "status": "SUCCESS",
       "metrics": {
-        "accuracy": 0.9941829719725013,
-        "precision": 0.9904458598726115,
-        "recall": 0.9749216300940439,
-        "f1": 0.9826224328593997,
-        "roc_auc": 0.9995892060909171
+        "accuracy": 0.9988522678288557,
+        "precision": 0.9961358551962579,
+        "recall": 0.9970717652401309,
+        "f1": 0.9966035904900534,
+        "roc_auc": 0.9999493558280359
       },
-      "run_id": "4fe686896b99480490256981348a650a",
+      "run_id": "699bfd027a5f44ef91f772729435a335",
       "config_path": "configs\\models\\xgboost.yaml"
     }
   ]

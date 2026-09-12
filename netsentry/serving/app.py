@@ -1,4 +1,4 @@
-﻿"""
+"""
 NetSentry FastAPI Serving Application (`netsentry.serving.app`).
 ----------------------------------------------------------------
 Initializes model loader lifecycle, registers prediction and health routes,
@@ -54,12 +54,17 @@ def create_app(config: Optional[ServingConfig] = None, model_loader: Optional[Mo
     # Health & readiness routes
     app.include_router(health_router)
 
+    # Security Gateway Reverse Proxy
+    from netsentry.serving.routes.gateway import router as gateway_router
+    app.include_router(gateway_router)
+
     # Prediction router
     @app.get("/")
     async def read_root():
         return {"message": "Welcome to the NetSentry API!"}
 
     @app.post("/v1/predict", response_model=PredictionResponse, tags=["Prediction"])
+    @app.post("/v2/predict", response_model=PredictionResponse, tags=["Prediction"])
     async def predict(
         request: PredictionRequest,
         predictor: Predictor = Depends(get_predictor),

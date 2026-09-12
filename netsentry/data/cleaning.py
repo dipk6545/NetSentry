@@ -45,7 +45,8 @@ DUPLICATE_FEATURE_COLUMNS: List[str] = [
     "Subflow_Bwd_Bytes",
     "Avg_Fwd_Segment_Size",
     "Avg_Bwd_Segment_Size",
-    "Fwd_Header_Length_1"
+    "Fwd_Header_Length_1",
+    "Fwd_Header_Length_duplicated_0"
 ]
 
 

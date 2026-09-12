@@ -24,6 +24,10 @@ from netsentry.features.split import get_stratified_splits
 from netsentry.training.baseline import BaselineOrchestrator
 from netsentry.training.tracking import MLflowTracker
 
+import warnings
+warnings.filterwarnings("ignore", message=r".*artifact_path.*is deprecated.*")
+warnings.filterwarnings("ignore", message=r".*Saving scikit-learn models in the pickle or cloudpickle format.*")
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="NetSentry Baseline Model Training & Selection Tournament.")

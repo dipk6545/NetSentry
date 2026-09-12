@@ -119,10 +119,50 @@ class ModelLifecycleManager:
         self.alias_manager.assign_challenger(challenger_ver)
 
         # Load Champion model artifact
-        champion_model = self.client.load_model_by_version(
-            name=self.config.model_name,
-            version=current_champ_ver,
-        )
+        try:
+            champion_model = self.client.load_model_by_version(
+                name=self.config.model_name,
+                version=current_champ_ver,
+            )
+        except Exception as e:
+            # If incumbent champion artifact is missing or corrupted on disk, fall back cleanly
+            import logging
+            logging.getLogger("ModelLifecycleManager").warning(
+                f"Could not load incumbent champion v{current_champ_ver} artifact ({e}). Treating as first release."
+            )
+            champion_model = None
+            current_champ_ver = None
+
+        if champion_model is None:
+            comp = self.comparator.compare(
+                champion_model=candidate_model,
+                challenger_model=candidate_model,
+                X_val=X_val,
+                y_val=y_val,
+                X_test=X_test,
+                y_test=y_test,
+                labels_test=labels_test,
+            )
+            decision = evaluate_promotion(
+                comparison=comp,
+                champion_version=None,
+                challenger_version=challenger_ver,
+                config=self.config.promotion,
+            )
+            if decision.passed:
+                self.alias_manager.assign_champion(challenger_ver)
+                champ_after = challenger_ver
+                is_new = True
+            else:
+                champ_after = "none"
+                is_new = False
+
+            return LifecyclePromotionResult(
+                registered_version=challenger_ver,
+                decision=decision,
+                champion_version_after=champ_after,
+                is_new_champion=is_new,
+            )
 
         # Execute side-by-side comparison on identical test protocol
         comp = self.comparator.compare(

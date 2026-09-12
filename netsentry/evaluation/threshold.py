@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validation Decision Threshold Optimizer (`netsentry.evaluation.threshold`).
 ----------------------------------------------------------------------------
 Finds the optimal decision threshold tau* on VALIDATION probabilities
@@ -62,6 +62,12 @@ def find_optimal_threshold(
                 score = rec
         elif cfg.objective == "precision":
             score = prec
+        elif cfg.objective == "youden_j":
+            # Youden's J = TPR - FPR = Recall + Specificity - 1
+            tn = np.sum((y_t == 0) & (preds == 0))
+            fp = np.sum((y_t == 0) & (preds == 1))
+            spec = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+            score = rec + spec - 1.0
         else:
             score = f1
 

@@ -1,4 +1,4 @@
-model_config: configs/models/logistic_regression.yaml
+model_config: configs/models/svm.yaml
 
 tuning:
   n_trials: 20
@@ -9,11 +9,11 @@ tuning:
 search_space:
   C:
     type: float
-    low: 0.01
-    high: 10.0
+    low: 0.001
+    high: 100.0
     log: true
   max_iter:
     type: int
-    low: 200
-    high: 1000
-    step: 100
+    low: 1000
+    high: 3000
+    step: 500

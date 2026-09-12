@@ -1,4 +1,4 @@
-﻿"""
+"""
 Evaluation Configuration Schema (`netsentry.evaluation.config`).
 --------------------------------------------------------------
 Defines settings for final test evaluation, validation threshold search,
@@ -20,11 +20,11 @@ class EvaluationConfigValidationError(ValueError):
 class ThresholdConfig:
     """Settings for validation-set decision threshold search."""
     enabled: bool = True
-    objective: str = "f1"  # "f1", "recall", "precision"
+    objective: str = "f1"  # "f1", "recall", "precision", "youden_j", "pr_auc"
     min_precision: Optional[float] = None  # optional constraint when optimizing recall
 
     def __post_init__(self):
-        valid_objs = {"f1", "recall", "precision"}
+        valid_objs = {"f1", "recall", "precision", "youden_j", "pr_auc"}
         if self.objective not in valid_objs:
             raise EvaluationConfigValidationError(
                 f"Invalid threshold objective '{self.objective}'. Allowed: {valid_objs}"

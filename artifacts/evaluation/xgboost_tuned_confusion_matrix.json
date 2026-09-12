@@ -1,0 +1,21 @@
+{
+  "model_name": "xgboost_tuned",
+  "default_threshold": 0.5,
+  "optimal_threshold": 0.208,
+  "default_confusion_matrix": {
+    "tn": 314080,
+    "fp": 196,
+    "fn": 90,
+    "tp": 63771,
+    "fnr": 0.001409310846995819,
+    "fpr": 0.0006236556402652446
+  },
+  "optimal_confusion_matrix": {
+    "tn": 313946,
+    "fp": 330,
+    "fn": 14,
+    "tp": 63847,
+    "fnr": 0.00021922613175490518,
+    "fpr": 0.001050032455548626
+  }
+}

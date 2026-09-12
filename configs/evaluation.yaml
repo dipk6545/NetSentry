@@ -1,9 +1,9 @@
-﻿evaluation:
-  primary_metric: f1
+evaluation:
+  primary_metric: recall
 
 threshold:
   enabled: true
-  objective: f1
+  objective: youden_j
 
 quality_gates:
   recall:

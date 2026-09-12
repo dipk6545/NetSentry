@@ -154,6 +154,7 @@ class Tuner:
             objective,
             n_trials=self.tuning_config.tuning.n_trials,
             timeout=self.tuning_config.tuning.timeout_seconds,
+            catch=(Exception,),
         )
 
         best_params = study.best_params

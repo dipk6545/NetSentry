@@ -21,7 +21,18 @@ class MLflowTracker:
 
         if self.enabled and self.tracking_uri:
             mlflow.set_tracking_uri(self.tracking_uri)
-            mlflow.set_experiment(self.experiment_name)
+            try:
+                mlflow.set_experiment(self.experiment_name)
+            except Exception as e:
+                if "Cannot set a deleted experiment" in str(e):
+                    from mlflow.tracking import MlflowClient
+                    client = MlflowClient(self.tracking_uri)
+                    exp = client.get_experiment_by_name(self.experiment_name)
+                    if exp:
+                        client.restore_experiment(exp.experiment_id)
+                        mlflow.set_experiment(self.experiment_name)
+                else:
+                    raise
 
     @contextmanager
     def start_run(self, run_name: Optional[str] = None) -> Generator[Optional[str], None, None]:
@@ -30,7 +41,9 @@ class MLflowTracker:
             yield None
             return
 
-        with mlflow.start_run(run_name=run_name) as run:
+        # Support nested run if an existing run is already active
+        nested = mlflow.active_run() is not None
+        with mlflow.start_run(run_name=run_name, nested=nested) as run:
             yield run.info.run_id
 
     def log_params(self, params: Dict[str, Any]) -> None:
@@ -63,3 +76,15 @@ class MLflowTracker:
             artifact_path=artifact_path,
             serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
         )
+
+    def log_artifact(self, local_path: str, artifact_path: Optional[str] = None) -> None:
+        """Logs a local file or directory as an MLflow artifact."""
+        if not self.enabled:
+            return
+        mlflow.log_artifact(local_path=local_path, artifact_path=artifact_path)
+
+    def log_dict(self, dictionary: Dict[str, Any], artifact_file: str) -> None:
+        """Logs a Python dictionary as a JSON artifact directly to MLflow."""
+        if not self.enabled:
+            return
+        mlflow.log_dict(dictionary, artifact_file)

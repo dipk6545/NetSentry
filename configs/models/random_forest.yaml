@@ -1,14 +1,13 @@
-name: xgboost
+name: random_forest
 
 implementation:
-  class_path: xgboost.XGBClassifier
+  class_path: sklearn.ensemble.RandomForestClassifier
 
 preprocessing:
   scaling: none
 
 parameters:
   n_estimators: 100
-  max_depth: 6
-  learning_rate: 0.1
+  max_depth: 12
   n_jobs: -1
   random_state: 42

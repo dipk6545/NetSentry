@@ -1,0 +1,28 @@
+model_config: configs/models/catboost.yaml
+
+tuning:
+  n_trials: 10
+  direction: maximize
+  metric: recall
+  timeout_seconds: 1800
+
+search_space:
+  iterations:
+    type: int
+    low: 100
+    high: 250
+    step: 50
+  depth:
+    type: int
+    low: 4
+    high: 7
+  learning_rate:
+    type: float
+    low: 0.03
+    high: 0.25
+    log: true
+  l2_leaf_reg:
+    type: float
+    low: 1.0
+    high: 10.0
+    log: true

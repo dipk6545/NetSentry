@@ -51,3 +51,6 @@ data/processed/*
 .DS_Store
 Thumbs.db
 
+# Model specific logs
+catboost_info/
+

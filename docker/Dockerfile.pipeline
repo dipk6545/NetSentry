@@ -1,0 +1,57 @@
+# ==============================================================================
+# Stage 1: Build & Dependencies
+# ==============================================================================
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+# Install compilation tools needed for C/C++ extensions & OpenMP (XGBoost/LightGBM)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python wheels into isolated wheels directory
+COPY docker/requirements.pipeline.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip wheel --no-cache-dir --wheel-dir=/build/wheels -r requirements.pipeline.txt
+
+# ==============================================================================
+# Stage 2: Clean Runtime Image
+# ==============================================================================
+FROM python:3.11-slim AS runtime
+
+WORKDIR /app
+
+# Install runtime OpenMP library (libgomp1) required by GBDT engines
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root application user for production security
+RUN groupadd -g 1000 appgroup && \
+    useradd -u 1000 -g appgroup -s /bin/bash -m appuser
+
+# Install pre-built wheels from builder stage
+COPY --from=builder /build/wheels /wheels
+RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* && \
+    rm -rf /wheels
+
+# Copy application source, configs, and entrypoint scripts
+COPY --chown=appuser:appgroup netsentry/ ./netsentry/
+COPY --chown=appuser:appgroup configs/ ./configs/
+COPY --chown=appuser:appgroup scripts/ ./scripts/
+COPY --chown=appuser:appgroup pyproject.toml ./
+
+# Install local package in editable/link mode
+RUN pip install --no-cache-dir --no-deps -e .
+
+# Switch to non-root user
+USER appuser
+
+# Set python path and unbuffered output for real-time docker logs
+ENV PYTHONPATH="/app" \
+    PYTHONUNBUFFERED=1
+
+ENTRYPOINT ["python"]
+CMD ["scripts/run_pipeline.py"]
