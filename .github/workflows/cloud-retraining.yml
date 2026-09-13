@@ -2,9 +2,9 @@ name: Cloud Scheduled Retraining Pipeline
 
 on:
   schedule:
-    # Run every 14 days at 02:00 UTC (identical to Airflow schedule)
+    # Runs every 14 days at 02:00 UTC (14-day production cycle)
     - cron: '0 2 */14 * *'
-  # Allows you to click "Run workflow" manually anytime from the GitHub UI!
+  # Allows you to trigger it manually anytime with a single click in GitHub!
   workflow_dispatch:
     inputs:
       force_tuning:
@@ -14,12 +14,12 @@ on:
         default: false
 
 jobs:
-  train-and-promote:
+  retrain-and-promote:
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
     steps:
-      - name: Check out code
+      - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up Python 3.11
@@ -39,6 +39,15 @@ jobs:
           pip install -r docker/requirements.pipeline.txt
           pip install -e .
 
+      - name: Download Training Dataset from Cloudflare R2
+        env:
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          python -c "from netsentry.data.storage import download_file_from_r2; download_file_from_r2('data/clean_network_flows.parquet', 'data/processed/clean_network_flows.parquet')"
+
       - name: Run Baseline Tournament
         env:
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
@@ -55,7 +64,8 @@ jobs:
           fi
           python scripts/run_pipeline.py --top-k 3 $EXTRA_ARGS
 
-      - name: Upload Drift and Baseline Artifacts
+      - name: Upload Drift & Evaluation Artifacts to GitHub
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: retraining-artifacts
