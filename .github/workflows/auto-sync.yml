@@ -1,8 +1,8 @@
-name: Auto Sync Code (Protect .github)
+name: Auto Sync Code (PubSub Trigger)
 
 on:
-  schedule:
-    - cron: '0 * * * *' # Checks every hour
+  repository_dispatch:
+    types: [upstream_code_updated]
   workflow_dispatch:
 
 jobs:
@@ -19,16 +19,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Add Repo 1 as upstream remote
           git remote add upstream https://github.com/dipk6545/NetSentry.git
           git fetch upstream main
-
-          # Pull everything EXCEPT .github folder
           git checkout upstream/main -- netsentry/ configs/ docker/ scripts/ tests/ dags/ pyproject.toml
-          
-          # Commit and push if there are code changes
           if ! git diff --staged --quiet; then
-            git commit -m "chore(sync): auto-sync latest codebase from dipk6545/NetSentry"
+            git commit -m "chore(sync): pubsub auto-sync from dipk6545/NetSentry"
             git push origin main
           fi
