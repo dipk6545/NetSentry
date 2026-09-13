@@ -25,3 +25,5 @@ scapy>=2.5.0
 # Reporting & Visualizations
 matplotlib>=3.8.0
 seaborn>=0.13.0
+
+boto3>=1.34.0
