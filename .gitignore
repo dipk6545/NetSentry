@@ -53,4 +53,5 @@ Thumbs.db
 
 # Model specific logs
 catboost_info/
-
+artifacts/
+.env

@@ -31,6 +31,7 @@ default_args = {
 # Host project root (mapped to volume mounts in DockerOperator)
 PROJECT_DIR = os.getenv("NETSENTRY_HOST_DIR", "/app")
 DOCKER_IMAGE = "netsentry-pipeline:latest"
+MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "")
 
 # Standard host mounts so the container reads/writes directly to persistent storage
 standard_mounts = [
@@ -60,6 +61,8 @@ with DAG(
         image=DOCKER_IMAGE,
         api_version="auto",
         auto_remove=True,
+        user="0:0",
+        environment={"MLFLOW_TRACKING_URI": MLFLOW_URI},
         command="scripts/train_baselines.py",
         docker_url="unix://var/run/docker.sock",
         network_mode="bridge",
@@ -75,6 +78,8 @@ with DAG(
         image=DOCKER_IMAGE,
         api_version="auto",
         auto_remove=True,
+        user="0:0",
+        environment={"MLFLOW_TRACKING_URI": MLFLOW_URI},
         command="scripts/run_pipeline.py --top-k 3",
         docker_url="unix://var/run/docker.sock",
         network_mode="bridge",

@@ -1,4 +1,4 @@
-﻿registry:
+registry:
   model_name: NetSentry
 
 aliases:
@@ -6,12 +6,12 @@ aliases:
   challenger: challenger
 
 comparison:
-  primary_metric: recall
+  primary_metric: pr_auc
   secondary_metrics:
+    - recall
     - precision
     - f1
     - roc_auc
-    - pr_auc
     - fnr
     - fpr
     - latency_p95_ms
@@ -21,9 +21,12 @@ promotion:
   require_challenger_better: true
 
   rules:
-    recall:
+    pr_auc:
       minimum: 0.90
       improvement_required: true
+
+    recall:
+      minimum: 0.90
 
     precision:
       minimum: 0.85

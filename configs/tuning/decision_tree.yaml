@@ -1,31 +1,26 @@
-model_config: configs/models/random_forest.yaml
+model_config: configs/models/decision_tree.yaml
 
 tuning:
-  n_trials: 5
+  n_trials: 10
   direction: maximize
   metric: recall
   timeout_seconds: 600
 
 search_space:
-  n_estimators:
-    type: int
-    low: 50
-    high: 100
-    step: 25
   max_depth:
     type: int
     low: 6
-    high: 10
+    high: 12
   min_samples_split:
     type: int
     low: 5
-    high: 20
+    high: 30
   min_samples_leaf:
     type: int
     low: 2
-    high: 10
-  max_features:
+    high: 15
+  criterion:
     type: categorical
     choices:
-      - sqrt
-      - log2
+      - gini
+      - entropy
