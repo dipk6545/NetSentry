@@ -12,6 +12,10 @@ catboost>=1.2.0
 # Hyperparameter Optimization & Experiment Tracking
 optuna>=3.4.0
 mlflow>=2.10.0
+psycopg2-binary>=2.9.9
+
+# Scientific & Drift Analysis
+scipy>=1.11.0
 
 # Configuration & Utilities
 pyyaml>=6.0.1

@@ -1,0 +1,33 @@
+model_config: configs/models/hist_gradient_boosting.yaml
+
+tuning:
+  n_trials: 20
+  direction: maximize
+  metric: recall
+  timeout_seconds: 3600
+
+search_space:
+  max_iter:
+    type: int
+    low: 100
+    high: 300
+    step: 50
+  max_depth:
+    type: int
+    low: 4
+    high: 10
+  learning_rate:
+    type: float
+    low: 0.01
+    high: 0.25
+    log: true
+  min_samples_leaf:
+    type: int
+    low: 10
+    high: 50
+    step: 5
+  l2_regularization:
+    type: float
+    low: 1e-4
+    high: 10.0
+    log: true

@@ -37,6 +37,7 @@ if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
 from netsentry.data.pipeline import run_data_pipeline
+from netsentry.evaluation.drift import DataDriftDetector
 from netsentry.evaluation.evaluator import Evaluator
 from netsentry.evaluation.metrics import compute_binary_metrics
 from netsentry.evaluation.threshold import apply_threshold, find_optimal_threshold
@@ -113,6 +114,8 @@ def main():
     parser.add_argument("--top-k", type=int, default=3, help="Number of top baseline models to tune and compare (default: 3)")
     parser.add_argument("--tuning-trials", type=int, default=None, help="Override number of Optuna HPO trials")
     parser.add_argument("--skip-tuning", action="store_true", help="Skip Optuna HPO and train baseline directly")
+    parser.add_argument("--force-tuning", action="store_true", help="Force Optuna HPO even if no drift is detected")
+    parser.add_argument("--drift-threshold", type=float, default=0.20, help="Fraction of drifted features triggering emergency HPO (default: 0.20)")
     parser.add_argument("--tracking-uri", type=str, default="sqlite:///mlruns.db", help="MLflow tracking URI")
     parser.add_argument("--experiment-name", type=str, default="netsentry-production-pipeline", help="MLflow experiment")
     args = parser.parse_args()
@@ -165,7 +168,25 @@ def main():
         )
         logger.info(f"Selected Top-{len(candidate_models)} baseline models for tuning & comparison: {candidate_models}")
 
-    # 4. Hyperparameter Optimization & Model Selection across Candidates
+    # 4. Data Drift Evaluation (Adaptive Trigger: Fast Retrain vs. Emergency HPO)
+    logger.info("Step 2/6: Evaluating Feature Distribution Drift against Reference Baseline...")
+    drift_detector = DataDriftDetector(dataset_drift_threshold=args.drift_threshold)
+    drift_report = drift_detector.calculate_drift(
+        reference_data=X_train,
+        current_data=X_val,
+        feature_names=splits.feature_names if hasattr(splits, "feature_names") else None,
+    )
+    drift_artifact_path = project_root / "artifacts" / "drift" / "latest.json"
+    drift_detector.save_report(drift_report, drift_artifact_path)
+
+    trigger_hpo = drift_report.drift_detected or args.force_tuning
+    if trigger_hpo:
+        reason = "Drift Detected" if drift_report.drift_detected else "Forced via CLI"
+        logger.warning(f"🚨 TRIGGERING EMERGENCY OPTUNA HPO ({reason})! Significant feature shift observed.")
+    else:
+        logger.info("✅ NO SIGNIFICANT DRIFT DETECTED. Proceeding with Fast Production Retraining on existing architectures.")
+
+    # 5. Model Retraining or Emergency HPO
     tuned_models = {}
 
     for idx, model_name in enumerate(candidate_models, 1):
@@ -176,56 +197,51 @@ def main():
         model_instance = None
         current_opt_name = model_name
 
-        if not args.skip_tuning:
-            existing_tuned_yaml = project_root / "configs" / "models" / f"{model_name}_tuned.yaml"
-            if existing_tuned_yaml.exists():
-                logger.info(f"⚡ Found existing tuned configuration for '{model_name}': {existing_tuned_yaml.name}. Reusing tuned parameters (skipping redundant HPO)!")
-                tuned_model_cfg = load_model_config(str(existing_tuned_yaml))
-                model_instance = create_model(tuned_model_cfg)
-                X_combined = np.vstack([X_train, X_val])
-                y_combined = np.concatenate([y_train, y_val])
-                model_instance.fit(X_combined, y_combined)
+        # Case A: Emergency HPO Triggered (or tuning explicitly requested without skip)
+        if trigger_hpo and not args.skip_tuning:
+            tuning_config_file = project_root / "configs" / "tuning" / f"{model_name}.yaml"
+            if tuning_config_file.exists():
+                logger.info(f"Running Optuna HPO for '{model_name}' ({tuning_config_file.name})...")
+                tuning_cfg = load_tuning_config(str(tuning_config_file))
+                if args.tuning_trials:
+                    from dataclasses import replace
+                    updated_settings = replace(tuning_cfg.tuning, n_trials=args.tuning_trials)
+                    tuning_cfg = replace(tuning_cfg, tuning=updated_settings)
+
+                tuner = Tuner(
+                    tuning_config=tuning_cfg,
+                    tracker=tracker,
+                )
+                tuning_res = tuner.tune(
+                    X_train=X_train,
+                    y_train=y_train,
+                    X_val=X_val,
+                    y_val=y_val,
+                    output_dir=str(project_root / "configs" / "models"),
+                    retrain_on_train_val=True,
+                )
+                model_instance = tuning_res.final_model
                 current_opt_name = f"{model_name}_tuned"
+                logger.info(f"Tuning finished for '{model_name}'. Best score ({tuning_cfg.tuning.metric}): {tuning_res.best_score:.4f}")
+                logger.info(f"Saved tuned configuration to: {tuning_res.tuned_model_config_path}")
             else:
-                tuning_config_file = project_root / "configs" / "tuning" / f"{model_name}.yaml"
-                if tuning_config_file.exists():
-                    logger.info(f"Running Optuna HPO for '{model_name}' ({tuning_config_file.name})...")
-                    tuning_cfg = load_tuning_config(str(tuning_config_file))
-                    if args.tuning_trials:
-                        from dataclasses import replace
-                        updated_settings = replace(tuning_cfg.tuning, n_trials=args.tuning_trials)
-                        tuning_cfg = replace(tuning_cfg, tuning=updated_settings)
+                logger.warning(
+                    f"No HPO config found at '{tuning_config_file}'. Falling back to fast retrain."
+                )
 
-                    tuner = Tuner(
-                        tuning_config=tuning_cfg,
-                        tracker=tracker,
-                    )
-                    tuning_res = tuner.tune(
-                        X_train=X_train,
-                        y_train=y_train,
-                        X_val=X_val,
-                        y_val=y_val,
-                        output_dir=str(project_root / "configs" / "models"),
-                        retrain_on_train_val=True,
-                    )
-                    model_instance = tuning_res.final_model
-                    current_opt_name = f"{model_name}_tuned"
-                    logger.info(f"Tuning finished for '{model_name}'. Best score ({tuning_cfg.tuning.metric}): {tuning_res.best_score:.4f}")
-                    logger.info(f"Saved tuned configuration to: {tuning_res.tuned_model_config_path}")
-                else:
-                    logger.warning(
-                        f"No HPO config found at '{tuning_config_file}'. Fitting baseline config directly."
-                    )
-
+        # Case B: Fast Retrain (No drift) - Retrain winning architecture on Train + Val
         if model_instance is None:
-            logger.info(f"Fitting baseline model '{model_name}' on Train + Val splits...")
-            base_cfg_file = project_root / "configs" / "models" / f"{model_name}.yaml"
-            base_model_cfg = load_model_config(str(base_cfg_file))
-            model_instance = create_model(base_model_cfg)
+            existing_tuned_yaml = project_root / "configs" / "models" / f"{model_name}_tuned.yaml"
+            base_yaml = project_root / "configs" / "models" / f"{model_name}.yaml"
+            target_cfg_file = existing_tuned_yaml if existing_tuned_yaml.exists() else base_yaml
+
+            logger.info(f"⚡ Fast Retraining model '{model_name}' using config '{target_cfg_file.name}' on Train + Val...")
+            model_cfg = load_model_config(str(target_cfg_file))
+            model_instance = create_model(model_cfg)
             X_combined = np.vstack([X_train, X_val])
             y_combined = np.concatenate([y_train, y_val])
             model_instance.fit(X_combined, y_combined)
-            current_opt_name = model_name
+            current_opt_name = target_cfg_file.stem
 
         tuned_models[model_name] = {
             "model": model_instance,

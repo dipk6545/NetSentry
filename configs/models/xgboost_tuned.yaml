@@ -1,0 +1,32 @@
+name: xgboost_tuned
+
+implementation:
+  class_path: xgboost.XGBClassifier
+
+preprocessing:
+  scaling: none
+
+parameters:
+  n_estimators: 293
+  learning_rate: 0.09319882472856836
+  max_depth: 8
+  min_child_weight: 3
+  subsample: 0.9283640047547725
+  colsample_bytree: 0.8879289165407154
+  scale_pos_weight: 1.0
+  objective: "binary:logistic"
+  eval_metric: "auc"
+  tree_method: "hist"
+  device: "cpu"
+  n_jobs: -1
+  random_state: 42
+
+metadata:
+  optimal_threshold: 0.1487
+  research_metrics:
+    recall: 0.9998
+    missed_attacks: 13
+    false_alarms: 362
+    precision: 0.9944
+    f1_score: 0.9971
+    roc_auc: 0.99998

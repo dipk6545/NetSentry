@@ -1,0 +1,10 @@
+name: decision_tree
+implementation:
+  class_path: sklearn.tree.DecisionTreeClassifier
+preprocessing:
+  scaling: none
+parameters:
+  max_depth: 8
+  min_samples_split: 10
+  min_samples_leaf: 5
+  random_state: 42

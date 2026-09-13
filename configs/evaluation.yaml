@@ -1,11 +1,13 @@
 evaluation:
-  primary_metric: recall
+  primary_metric: pr_auc
 
 threshold:
   enabled: true
   objective: youden_j
 
 quality_gates:
+  pr_auc:
+    min: 0.90
   recall:
     min: 0.90
   f1:
