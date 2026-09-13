@@ -3,6 +3,9 @@ name: NetSentry Pipeline CI
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'configs/**'
+      - '*.md'
   pull_request:
     branches: [ main ]
 
