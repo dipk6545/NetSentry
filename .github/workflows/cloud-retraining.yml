@@ -68,7 +68,7 @@ jobs:
           if [ "${{ inputs.force_tuning }}" = "true" ]; then
             EXTRA_ARGS="--force-tuning"
           fi
-          python scripts/run_pipeline.py --top-k 3 $EXTRA_ARGS
+          python scripts/run_pipeline.py --top-k 3 --tracking-uri "${{ secrets.MLFLOW_TRACKING_URI }}" $EXTRA_ARGS
 
       - name: Upload Drift & Evaluation Artifacts to GitHub
         if: always()
