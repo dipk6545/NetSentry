@@ -13,7 +13,8 @@ env_secret = modal.Secret.from_dotenv()
 
 @app.function(
     secrets=[env_secret],
-    scaledown_window=300,  # Keep container warm for 5 minutes between requests
+    min_containers=1,  # Keep 1 instance permanently warm to eliminate cold starts
+    scaledown_window=600,  # Keep scaled instances warm for 10 minutes
     timeout=600,
 )
 @modal.asgi_app()
